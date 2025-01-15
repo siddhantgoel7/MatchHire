@@ -1,41 +1,44 @@
-//installing dependencies
-const express = require('express');    //http request and setting up routes
-const cors = require('cors');          //sharing across differen origins
-const multer = require('multer');      //upload files
-const bodyParser = require('body-parser')  //handle JSON payloads
-const dotenv = require('dotenv');
+// Import dependencies
+const express = require('express'); // HTTP requests and setting up routes
+const cors = require('cors'); // Enable cross-origin requests
+const multer = require('multer'); // Handle file uploads
+const bodyParser = require('body-parser'); // Parse JSON payloads
+const dotenv = require('dotenv'); // Load environment variables
 
-//load enviournment variables
-dotenv.config(); //loads environment variables from a .env file into process.env (store API, URLS etc.)
+// Load environment variables
+dotenv.config(); // Load variables from .env into process.env
 
-//express application
+// Initialize Express application
 const app = express();
+const port = process.env.PORT || 5001; // Use the environment's port or 5001
 
-const port = process.env.PORT || 5000;
+// Middleware setup
+app.use(cors()); // Enable CORS
+app.use(bodyParser.json()); // Parse JSON bodies
 
-//middleware setup
-app.use(cors);
-app.use(bodyParser.json());
+// Configure Multer for file uploads
+const storage = multer.memoryStorage(); // Store files in memory
+const upload = multer({ storage: storage }); // Configure Multer
 
-//multer for file uploads
-const storage = multer.memoryStorage();     //memory storage
-const upload = multer({storage: storage});   //file uploads
-
-//test route
-app.get('/',(req, res) => {
-    res.send('MatchHire API')   //check server is running
+// Test route to check server status
+app.get('/', (req, res) => {
+    res.send('MatchHire API'); // Respond with a simple message
 });
 
-//POST route for file uploads
-app.post('/upload', upload.fields([{name: 'resume'}, {name: 'jobDescription'}]), (req,res)=>{
-    const {resume, jobDescription} = req.files;
-    if (!resume || !jobDescription){
-        return res.status(400).send('Please upload both resume and job description files');
+// POST route for file uploads
+app.post(
+    '/upload',
+    upload.fields([{ name: 'resume' }, { name: 'jobDescription' }]), // Expect 'resume' and 'jobDescription' files
+    (req, res) => {
+        const { resume, jobDescription } = req.files; // Extract files
+        if (!resume || !jobDescription) {
+            return res.status(400).send('Please upload both resume and job description files'); // Validate inputs
+        }
+        res.send('Files uploaded successfully'); // Respond on success
     }
-    res.send('Files upoaded successfully');
-});
+);
 
-//start 
-app.listen(port,() => {
-    console.log('Server running at http://localhost:${port}');
+// Start the server
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`); // Log server URL
 });
